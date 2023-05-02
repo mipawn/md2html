@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>组件文档</title>
+</head>
+<style>
+
+:root {
+  --nav-color: rgba(60, 60, 67, .7);
+  --nav-active-color: #646cff;
+}
+.root {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+}
+.nav {
+  width: 200px;
+}
+.main {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+}
+.main iframe {
+  width: 100%;
+  height: 100%;
+}
+ul, li {
+  list-style: none;
+}
+.menu {
+  padding: 0;
+  list-style: none;
+}
+.menu__item {
+  width: 100%;
+  padding: 10px 20px;
+  font-weight: 500;
+  color: var(--nav-color);
+  transition: color .25s;
+  cursor: pointer;
+}
+.menu__item.is-active{
+  color: var(--nav-active-color);
+}
+.menu__item:hover{
+  color: var(--nav-active-color);
+}
+.menu__item:has(.is-active) {
+  color: var(--nav-active-color);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+}
+.title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  background-color: var(--nav-color);
+  margin-right: 4px;
+  border-radius: 2px;
+}
+
+.menu__item:has(.is-active) > .title::before {
+  background-color: var(--nav-active-color);
+}
+</style>
+<body>
+  <div class="root">
+    <nav class="nav">
+
+    </nav>
+    <main class="main">
+      <iframe src="./html/form.html" frameborder="0"></iframe>
+    </main>
+  </div>
+</body>
+
+<script>
+  var navs = {{navs}}
+  var targetEl = null
+  function navClick(cur, e) {
+    const { isDir, path: filePath } = cur
+    const curEl = e.target
+    if(isDir) {
+      const height = curEl.style.height
+      !height || height === 'auto'
+        ? curEl.style = 'height:22px;'
+        : curEl.style = 'height:auto;'
+      return
+    }
+    targetEl && targetEl.classList.remove('is-active')
+    targetEl = curEl
+    targetEl.classList.add('is-active')
+    const iframeEl = document.querySelector('iframe')
+    iframeEl.src = filePath.replace('doc', './html')
+  }
+
+  // 根据navs 递归生成menu 的dom
+  const getMenuDom = (navs, defaultMenuId) => {
+    const navList = document.createElement('ul')
+    navList.classList.add('menu')
+    navs.forEach((item, index) => {
+      const navItem = document.createElement('li')
+      navItem.classList.add('menu__item')
+      navItem.innerHTML = `<span class="${item.isDir ? 'title' : null}">${item.name}</span>`
+      navItem.onclick = (e) => {
+        navClick(item, e)
+      }
+      if (item.id === defaultMenuId) {
+        navItem.classList.add('is-active')
+        targetEl = navItem
+        const iframeEl = document.querySelector('iframe')
+        iframeEl.src = item.path.replace('doc', './html')
+      }
+      if (item.children) {
+        const childrenDom = getMenuDom(item.children, defaultMenuId)
+        navItem.appendChild(childrenDom)
+      }
+      navList.appendChild(navItem)
+    })
+    return navList
+  }
+  const getDefaultMenuId = (navs, index = 0) => {
+    if(!navs || !navs.length) return null
+    const menu = navs[index]
+    const menuId =  menu.isDir
+      ? getDefaultMenuId(navs[index]?.children || navs[index + 1] || [])
+      : menu.id
+    return menuId
+  }
+  const setNavs = (defaultMenuId) => {
+    const navContainer = document.querySelector('.nav')
+    const menuDom = getMenuDom(navs, defaultMenuId)
+    navContainer.appendChild(menuDom)
+  }
+  window.onload = () => {
+    requestAnimationFrame(() => {
+      const defaultMenuId = getDefaultMenuId(navs)
+      setNavs(defaultMenuId)
+    })
+  }
+  
+</script>
+
+</html>

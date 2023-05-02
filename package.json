@@ -1,0 +1,20 @@
+{
+  "name": "fe-tech-doc",
+  "version": "1.0.0",
+  "description": "为前端服务，可以记录前端技术文档或者技术分享等",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@codeup.aliyun.com:60765d191bcc8f5015dfc469/web_dev/fe-tech-doc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "marked": "^4.3.0",
+    "shelljs": "^0.8.5"
+  }
+}
